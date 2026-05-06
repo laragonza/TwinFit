@@ -31,6 +31,19 @@ Actualmente el vestidor usa estas prendas:
 - MongoDB para guardar usuarios y prendas.
 - Apollo Server y GraphQL como estructura preparada para posibles ampliaciones.
 
+## Dependencia con MongoDB
+
+TwinFit necesita una base de datos MongoDB para poder guardar perfiles de usuario y consultar prendas desde el backend. En mi caso he usado MongoDB Atlas, pero tambien podria usarse una instancia local de MongoDB si se cambia la cadena de conexion.
+
+La conexion se configura mediante la variable de entorno `MONGODB_URI`. Esta variable no se incluye directamente en el repositorio por seguridad, ya que contiene datos privados de acceso a la base de datos. Por eso se deja un archivo `.env.example` como plantilla.
+
+El backend se conecta a la base de datos `twinfit`. Las colecciones principales que utiliza el proyecto son:
+
+- `users`, para guardar los perfiles de usuario.
+- `clothes`, para guardar informacion de prendas cuando se cargan desde la API.
+
+Si MongoDB no esta configurado, la parte visual del frontend puede seguir mostrando algunas prendas locales de respaldo, pero las funciones de backend, como guardar perfiles, no funcionaran correctamente.
+
 ## Estructura del proyecto
 
 ```text
@@ -87,13 +100,21 @@ https://deno.com/
 
 ### 3. Configurar MongoDB
 
-El backend necesita una variable de entorno con la conexion a MongoDB. Para probarlo en local, crea un archivo `.env` en la raiz del proyecto:
+El backend necesita una variable de entorno con la conexion a MongoDB. Para probarlo en local, crea un archivo `.env` en la raiz del proyecto y otro dentro de `backend/`.
+
+Archivo `.env` en la raiz del proyecto:
 
 ```env
 MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/twinfit?retryWrites=true&w=majority
 ```
 
-No subas el archivo `.env` a GitHub, porque contiene credenciales privadas.
+Archivo `backend/.env`:
+
+```env
+PORT=4000
+MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/twinfit?retryWrites=true&w=majority
+DB_NAME=twinfit
+```
 
 El backend se levanta en:
 

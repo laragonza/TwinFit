@@ -134,11 +134,4 @@ Por eso, en `frontend/js/clothes.js` hay logica especifica para cada prenda. El 
 
 TwinFit queda como una base funcional sobre la que se podrian seguir anadiendo mejoras, como mas prendas, recomendaciones de talla, modelos 3D mejor preparados o una simulacion de tejido mas realista.
 
-## Antes de subirlo a GitHub
 
-Antes de publicar el repositorio, conviene revisar estos puntos:
-
-- No subir archivos `.env` con contrasenas o claves privadas.
-- No subir `node_modules/`.
-- Revisar si los modelos `.glb` se van a subir directamente o mediante Git LFS.
-- Comprobar que el proyecto arranca con `deno task backend` y `deno task frontend`.

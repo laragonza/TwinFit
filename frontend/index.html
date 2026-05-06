@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TwinFit - Virtual Fitting Room</title>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Boxicons for UI icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="css/styles.css?v=ui_text_v1">
+    <!-- Import mapping for Three.js -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Toast Notification Overlay -->
+        <div id="loadingOverlay" style="display:none; position:fixed; top:20px; right:20px; background:rgba(0,0,0,0.8); color:white; padding:15px; border-radius:8px; z-index:9999; font-family:sans-serif; transition: opacity 0.3s; pointer-events:none;">
+            Cargando...
+        </div>
+
+        <!-- Main Header Removido (Studio ya tiene su propio header) -->
+
+        <!-- View 2: Studio View -->
+        <div id="studioView" class="view-container active">
+            <header class="studio-sub-header">
+                <div class="logo-studio">
+<div class="app-title-bold"><span style="font-weight: 800;">TwinFit</span> Studio</div>
+                </div>
+                <div class="studio-actions">
+                    <!-- Acciones eliminadas -->
+                </div>
+            </header>
+            
+            <div class="studio-layout">
+                <aside class="tools-sidebar" style="display: none;">
+                    <!-- Sidebar eliminada -->
+                </aside>
+
+                <main class="studio-main">
+                    <div class="canvas-wrapper">
+                        <!-- Canvas is injected here by Three.js -->
+                        <div id="canvas-container"></div>
+                        
+                        <div class="canvas-controls">
+                            <button class="canvas-btn" id="btn-reset" title="Restaurar vista"><i class='bx bx-reset'></i></button>
+                            <button class="canvas-btn" id="btn-zoom-in" title="Acercar"><i class='bx bx-zoom-in'></i></button>
+                            <button class="canvas-btn" id="btn-zoom-out" title="Alejar"><i class='bx bx-zoom-out'></i></button>
+                            <button class="canvas-btn" id="btn-rotate" title="Rotación automática"><i class='bx bx-rotate-right'></i></button>
+                        </div>
+                    </div>
+                    <!-- Logout / Back button in bottom left -->
+                    <!-- <button id="backToSetupBtn" class="back-btn"><i class='bx bx-log-out'></i></button> -->
+                </main>
+
+                <aside class="properties-sidebar">
+                    <div class="properties-header">
+                        <h3 id="propertiesTitle">Medidas Corporales</h3>
+                        <p id="propertiesDescription">Ajuste preciso de las dimensiones del avatar</p>
+                    </div>
+
+                    <div class="properties-content">
+                        <div class="studio-panel active" data-studio-panel="avatar">
+
+                        <!-- Detectar tono de piel desde foto -->
+                        <div class="photo-upload-section">
+                            <button id="photoUploadBtn" class="btn-photo-upload">
+                                <i class='bx bx-camera'></i> Detectar tono de piel desde foto
+                            </button>
+                            <input type="file" id="photoFileInput" accept="image/*" style="display:none">
+                            <div id="photoPreviewContainer" style="display:none; margin-top:0.75rem;">
+                                <img id="photoPreview" alt="Foto cargada" style="width:100%; max-height:140px; object-fit:cover; border-radius:10px; border:2px solid var(--border);">
+                                <p id="photoAnalysisStatus" style="font-size:0.8rem; color:var(--text-muted); margin:0.4rem 0 0; text-align:center;"></p>
+                            </div>
+                            <!-- Selector de tono de piel: siempre visible, justo debajo de la foto -->
+                            <div style="margin-top:0.85rem;">
+                                <label class="font-medium text-sm" style="display:block; margin-bottom:0.4rem;">Tono de Piel</label>
+                                <div class="skin-tones" id="skinToneSelector" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                    <button class="skin-btn active" data-color="0xfad6b1" style="background-color:#fad6b1;"></button>
+                                    <button class="skin-btn" data-color="0xe1b894" style="background-color:#e1b894;"></button>
+                                    <button class="skin-btn" data-color="0xc68e65" style="background-color:#c68e65;"></button>
+                                    <button class="skin-btn" data-color="0x9a6548" style="background-color:#9a6548;"></button>
+                                    <button class="skin-btn" data-color="0x683c26" style="background-color:#683c26;"></button>
+                                    <button class="skin-btn" data-color="0x3b1c0d" style="background-color:#3b1c0d;"></button>
+                                    <!-- Cuentagotas: usa EyeDropper API, sin popup -->
+                                    <button id="skinEyedropper"
+                                        title="Cuentagotas: clic para coger el color de la foto"
+                                        style="width:28px;height:28px;border-radius:50%;border:2px solid #ccc;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;">
+                                        <i class='bx bx-eyedropper' style="font-size:15px;color:#555;pointer-events:none;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="divider" style="margin-bottom:1rem;">
+
+                        <!-- Perfil -->
+                        <h4 class="section-title">PERFIL</h4>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <input type="text" id="studio-name" placeholder="Tu Nombre Aquí" class="modern-input" style="width: 100%; border-radius: 8px; padding: 0.8rem; border: 1px solid #e5e7eb; background: #f9fafb; font-family: 'Inter', sans-serif;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="font-medium text-sm" style="display:block; margin-bottom: 0.5rem;">Género</label>
+                            <select id="studio-gender" class="modern-select" style="width: 100%; border-radius: 8px; padding: 0.5rem;">
+                                <option value="female">Femenino</option>
+                                <option value="male">Masculino</option>
+                            </select>
+                        </div>
+                        
+                        <hr class="divider">
+                        <!-- Sliders -->
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label"><i class='bx bx-expand-horizontal' style="color: #1a56db;"></i> Pecho</span>
+                                <span class="val-badge"><span id="studio-chestVal">92</span> cm</span>
+                            </div>
+                            <input type="range" id="studio-chest" class="modern-range" min="80" max="130" value="92">
+                        </div>
+                        
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label"><i class='bx bx-minus' style="color: #1a56db;"></i> Cintura</span>
+                                <span class="val-badge"><span id="studio-waistVal">74</span> cm</span>
+                            </div>
+                            <input type="range" id="studio-waist" class="modern-range" min="72" max="120" value="74">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label"><i class='bx bx-expand-vertical' style="color: #1a56db;"></i> Caderas</span>
+                                <span class="val-badge"><span id="studio-hipsVal">98</span> cm</span>
+                            </div>
+                            <input type="range" id="studio-hips" class="modern-range" min="80" max="130" value="98">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label"><i class='bx bx-ruler' style="color: #1a56db;"></i> Estatura</span>
+                                <span class="val-badge"><span id="studio-heightVal">175</span> cm</span>
+                            </div>
+                            <input type="range" id="studio-height" class="modern-range" min="140" max="220" value="175">
+                        </div>
+                        </div>
+
+                        <div class="studio-panel" data-studio-panel="wardrobe" hidden>
+                        <div class="wardrobe-summary">
+                            <h4>Avatar listo</h4>
+                            <p><span id="summaryGender">Femenino</span> - <span id="summaryHeight">175</span> cm</p>
+                            <div class="measure-summary-grid">
+                                <div><span>Pecho</span><strong id="summaryChest">92</strong></div>
+                                <div><span>Cintura</span><strong id="summaryWaist">78</strong></div>
+                                <div><span>Caderas</span><strong id="summaryHips">96</strong></div>
+                            </div>
+                        </div>
+                        <hr class="divider">
+                        
+                        <h4 class="section-title">VESTIDOR</h4>
+
+                        <div class="customization-group" style="margin-top: 1.5rem;">
+                           <label class="font-medium text-sm">Ropa</label>
+                           <div id="clothesList" class="clothes-grid-modern">
+                               <!-- Javascript will populate this based on gender -->
+                           </div>
+                           <!-- Color de la prenda activa -->
+                           <div id="clothColorSection" style="display:none; margin-top:0.6rem; padding:0.5rem 0.6rem; background:#f8faff; border:1px solid #dde7ff; border-radius:8px;">
+                               <div style="display:flex;align-items:center;gap:8px;">
+                                   <input type="color" id="clothColorPicker" value="#ffffff"
+                                       style="width:28px;height:28px;border-radius:6px;border:1px solid #d1d5db;padding:1px;cursor:pointer;">
+                                   <span id="activeClothLabel" style="font-size:0.8rem;color:#555;">Color de prenda</span>
+                               </div>
+                               <div id="clothColorRow2" style="display:none;margin-top:6px;align-items:center;gap:8px;">
+                                   <input type="color" id="clothColorPicker2" value="#ffffff"
+                                       style="width:28px;height:28px;border-radius:6px;border:1px solid #d1d5db;padding:1px;cursor:pointer;">
+                                   <span id="activeClothLabel2" style="font-size:0.8rem;color:#555;">Color de pantalón</span>
+                               </div>
+                           </div>
+                        </div>
+                        </div>
+                    </div>
+                    
+                    <div class="properties-footer active" data-studio-footer="avatar">
+                        <button id="openWardrobeBtn" class="btn-primary w-full"><i class='bx bx-closet'></i> Ir al Vestidor</button>
+                        <button id="resetProfileBtn" class="btn-secondary w-full" style="margin-top: 0.5rem;"><i class='bx bx-refresh'></i> Restablecer</button>
+                    </div>
+                    <div class="properties-footer" data-studio-footer="wardrobe" hidden>
+                        <button id="backToAvatarBtn" class="btn-secondary w-full"><i class='bx bx-edit'></i> Editar Medidas</button>
+                        <button id="saveUserBtn" class="btn-primary w-full" style="margin-top: 0.5rem;"><i class='bx bx-save'></i> Guardar Perfil</button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/main.js?v=twinfit_v137"></script>
+</body>
+
+</html>

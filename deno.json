@@ -1,0 +1,27 @@
+{
+    "tasks": {
+        "start": "deno run --allow-net --allow-read --allow-env --allow-sys --watch backend/src/server.ts",
+        "backend": "deno task start",
+        "frontend": "deno run --allow-net --allow-read --allow-sys https://deno.land/std/http/file_server.ts frontend --host 127.0.0.1 --port 4509"
+    },
+    "nodeModulesDir": "auto",
+    "imports": {
+        "oak": "https://deno.land/x/oak@v12.6.2/mod.ts",
+        "cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
+        "mongo": "https://deno.land/x/mongo@v0.32.0/mod.ts",
+        "std/": "https://deno.land/std@0.208.0/",
+        "mongodb": "npm:mongodb@6.3.0",
+        "dotenv": "npm:dotenv@16.3.1",
+        "apollo-server": "npm:apollo-server@3.13.0",
+        "graphql": "npm:graphql@16.8.1",
+        "jsonwebtoken": "npm:jsonwebtoken@9.0.2"
+    },
+    "compilerOptions": {
+        "lib": [
+            "deno.ns",
+            "dom",
+            "dom.iterable",
+            "deno.unstable"
+        ]
+    }
+}

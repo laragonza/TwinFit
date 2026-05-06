@@ -1,0 +1,28 @@
+{
+    "tasks": {
+        "start": "deno run --allow-all src/server.ts"
+    },
+    "imports": {
+        "express": "npm:express@4.18.2",
+        "cors": "npm:cors@2.8.5",
+        "mongo": "https://deno.land/x/mongo@v0.32.0/mod.ts",
+        "std/": "https://deno.land/std@0.208.0/",
+        "mongodb": "npm:mongodb@6.3.0",
+        "dotenv": "npm:dotenv@16.3.1",
+        "apollo-server-express": "npm:apollo-server-express@3.13.0",
+        "graphql": "npm:graphql@16.8.1",
+        "jsonwebtoken": "npm:jsonwebtoken@9.0.2",
+        "@types/jsonwebtoken": "npm:@types/jsonwebtoken@9.0.6",
+        "@types/express": "npm:@types/express@4.17.21",
+        "@types/cors": "npm:@types/cors@2.8.17"
+    },
+    "compilerOptions": {
+        "lib": [
+            "deno.ns",
+            "dom",
+            "dom.iterable",
+            "deno.unstable"
+        ]
+    },
+    "nodeModulesDir": "auto"
+}

@@ -53,6 +53,7 @@ TwinFit/
 |   `-- index.html
 |-- docs/
 |-- ARRANCAR_TWINFIT.bat
+|-- ARRANCAR_TWINFIT_MAC.command
 `-- deno.json
 ```
 
@@ -109,6 +110,18 @@ ARRANCAR_TWINFIT.bat
 ```
 
 Este archivo abre el backend, el frontend y despues carga la aplicacion en el navegador.
+
+En macOS se puede usar el archivo:
+
+```text
+ARRANCAR_TWINFIT_MAC.command
+```
+
+Si macOS no deja abrirlo por permisos, ejecuta una vez:
+
+```bash
+chmod +x ARRANCAR_TWINFIT_MAC.command
+```
 
 La URL del frontend es:
 

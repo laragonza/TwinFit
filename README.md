@@ -44,19 +44,6 @@ El backend se conecta a la base de datos `twinfit`. Las colecciones principales 
 
 Si MongoDB no esta configurado, la parte visual del frontend puede seguir mostrando algunas prendas locales de respaldo, pero las funciones de backend, como guardar perfiles, no funcionaran correctamente.
 
-## Modelo antropometrico
-
-Los datos corporales se agrupan conceptualmente como un `anthropometricProfile`. Este perfil contiene la estatura y un mapa extensible de dimensiones corporales en centimetros. El prototipo actual usa un subconjunto minimo para ajustar las prendas disponibles, pero el documento puede incorporar nuevas claves como `shoulder_width` o `sleeve_length` sin cambiar la estructura general de la API.
-
-El backend mantiene `height` y `measures` como compatibilidad con el formato inicial, pero la nomenclatura tecnica recomendada para la memoria es perfil antropometrico o mapa de dimensiones corporales. La justificacion completa esta en `docs/modelo_antropometrico.md`.
-
-## Seguridad y privacidad
-
-TwinFit trata perfiles antropometricos y, opcionalmente, analiza una imagen local para estimar el tono de piel del avatar. La imagen se procesa en el navegador y no se almacena en MongoDB. El backend incorpora CORS configurable, cabeceras basicas de seguridad y `Cache-Control: no-store` para las respuestas de API.
-
-El prototipo no debe considerarse listo para produccion: un despliegue real deberia exigir HTTPS, autenticacion y autorizacion para acceder a perfiles, gestion segura de tokens, cifrado en transito y en reposo, politicas de minimizacion y mecanismos de supresion de datos conforme al RGPD.
-
-El analisis completo esta en `docs/seguridad_privacidad_rgpd.md`.
 
 ## Pruebas tecnicas automatizadas
 
@@ -70,7 +57,6 @@ Para ejecutarlas desde `TwinFit/`:
 deno task test
 ```
 
-El plan completo esta documentado en `docs/plan_pruebas_tecnicas.md`.
 
 ## Pruebas de rendimiento del cliente
 
@@ -100,7 +86,6 @@ Abrir en el movil:
 http://IP_DEL_ORDENADOR:4509/?perf=1
 ```
 
-El apendice de metodologia y tablas esta en `docs/apendice_rendimiento_cliente.md`.
 
 ## Estructura del proyecto
 
@@ -139,7 +124,6 @@ La carpeta `frontend/assets/` contiene los modelos GLB que usa la aplicacion:
 - `t-shirt.glb`
 - `denim_mom_jean.glb`
 
-Importante para GitHub: algunos modelos 3D pesan bastante. Si se suben los `.glb` al repositorio, puede hacer falta usar Git LFS, especialmente porque `Vestido3.glb` supera el limite normal de 100 MB de GitHub.
 
 ## Como ejecutar el proyecto
 

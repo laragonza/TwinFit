@@ -1,6 +1,7 @@
 import { SceneManager } from './scene.js';
-import { Avatar } from './avatar.js?v=arms_v105';
-import { Wardrobe } from './clothes.js?v=denim_fit_v91';
+import { Avatar } from './avatar.js?v=arms_v106';
+import { Wardrobe } from './clothes.js?v=denim_fit_v92';
+import { performanceMonitor } from './performanceMonitor.js';
 
 const API_URL = 'http://localhost:4000';
 const SUPPORTED_CLOTH_TYPES = new Set(['dress4', 'dress3', 'tshirt', 'denim_mom_jean']);
@@ -30,6 +31,7 @@ class App {
         // Aplicar límites de altura según género inicial
         const initialGender = document.getElementById('studio-gender')?.value || 'female';
         this._applyHeightLimits(initialGender);
+        performanceMonitor.setScenarioRunner(() => this.runPerformanceScenario());
     }
 
     _applyHeightLimits(gender) {
@@ -241,6 +243,8 @@ class App {
     }
 
     updateAvatarFromStudio() {
+        const finishPerfOperation = performanceMonitor.startOperation('updateAvatarFromStudio');
+        try {
         if (!App._clothListenerAdded) {
             window.addEventListener('cloth-active', () => {
                 if (document.getElementById('studioView').classList.contains('active')) {
@@ -275,6 +279,9 @@ class App {
         }
         this.avatar.updateMeasurements(avatarData);
         if (this.wardrobe) this.wardrobe.updateClothes(this.avatar);
+        } finally {
+            finishPerfOperation();
+        }
     }
 
     updateMeasureSummary(data = null) {
@@ -552,11 +559,21 @@ class App {
             return;
         }
 
+        const dimensions = { chest, waist, hips };
+        const anthropometricProfile = {
+            schemaVersion: 1,
+            unit: 'cm',
+            stature: height,
+            dimensions,
+            requiredDimensions: ['chest', 'waist', 'hips']
+        };
+
         const user = {
             name,
             gender,
             height,
-            measures: { chest, waist, hips }
+            anthropometricProfile,
+            measures: dimensions
         };
 
         try {
@@ -630,6 +647,117 @@ class App {
             btn.addEventListener('click', () => { this.wardrobe.loadCloth(cloth, this.avatar); });
             container.appendChild(btn);
         });
+    }
+
+    pause(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    waitForEvent(eventName, predicate = () => true, timeoutMs = 30000) {
+        return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                window.removeEventListener(eventName, handler);
+                reject(new Error(`Timeout esperando ${eventName}`));
+            }, timeoutMs);
+
+            const handler = (event) => {
+                if (!predicate(event)) return;
+                clearTimeout(timeout);
+                window.removeEventListener(eventName, handler);
+                resolve(event);
+            };
+
+            window.addEventListener(eventName, handler);
+        });
+    }
+
+    async waitForAvatarModel(timeoutMs = 30000) {
+        if (this.avatar?.model) return;
+        await this.waitForEvent('avatar-loaded', () => !!this.avatar?.model, timeoutMs);
+    }
+
+    async waitForAssetLoad(category, type, timeoutMs = 120000) {
+        await this.waitForEvent(
+            'perf-asset-loaded',
+            (event) => event.detail?.category === category
+                && event.detail?.type === type
+                && event.detail?.status === 'ok',
+            timeoutMs
+        );
+    }
+
+    getClothByType(type) {
+        const clothes = this._lastLoadedClothes || this.getLocalClothes();
+        return clothes.find(cloth => cloth.type === type) || this.getLocalClothes().find(cloth => cloth.type === type);
+    }
+
+    async setGenderForScenario(gender, forceReload = false) {
+        const genderSelect = document.getElementById('studio-gender');
+        if (!genderSelect) return;
+
+        if (forceReload && this.avatar) {
+            this.wardrobe.removeAll(this.avatar);
+            const avatarPromise = this.waitForEvent('avatar-loaded', () => this.avatar.currentGender === gender, 60000);
+            genderSelect.value = gender;
+            this.avatar.currentGender = gender;
+            this.avatar.initModel(gender);
+            await avatarPromise;
+        } else if (genderSelect.value !== gender) {
+            this.wardrobe.removeAll(this.avatar);
+            const avatarPromise = this.waitForEvent('avatar-loaded', () => this.avatar.currentGender === gender, 60000);
+            genderSelect.value = gender;
+            genderSelect.dispatchEvent(new Event('change', { bubbles: true }));
+            await avatarPromise;
+        } else {
+            await this.waitForAvatarModel();
+        }
+
+        this._applyHeightLimits(gender);
+        this.applyStudioMeasurements(this.getDefaultMeasurements(gender));
+        this.updateAvatarFromStudio();
+        if (this._lastLoadedClothes) this.renderClothesList(this._lastLoadedClothes);
+        await this.pause(250);
+    }
+
+    async loadScenarioCloth(type) {
+        const cloth = this.getClothByType(type);
+        if (!cloth) return;
+
+        const assetPromise = this.waitForAssetLoad('cloth', type);
+        this.wardrobe.loadCloth(cloth, this.avatar);
+        await assetPromise;
+        await this.pause(250);
+    }
+
+    async runPerformanceScenario() {
+        performanceMonitor.markScenarioStep('avatar femenino');
+        await this.setGenderForScenario('female', true);
+        this.setStudioPanel('wardrobe', true);
+
+        this.wardrobe.removeAll(this.avatar);
+        performanceMonitor.markScenarioStep('vestido flores');
+        await this.loadScenarioCloth('dress4');
+        this.applyStudioMeasurements({ height: 175, chest: 94, waist: 64, hips: 107 });
+        this.updateAvatarFromStudio();
+
+        this.wardrobe.removeAll(this.avatar);
+        performanceMonitor.markScenarioStep('vestido transparencias');
+        await this.loadScenarioCloth('dress3');
+        this.applyStudioMeasurements({ height: 168, chest: 99, waist: 73, hips: 96 });
+        this.updateAvatarFromStudio();
+
+        performanceMonitor.markScenarioStep('avatar masculino');
+        await this.setGenderForScenario('male');
+        this.setStudioPanel('wardrobe', true);
+
+        performanceMonitor.markScenarioStep('camiseta');
+        await this.loadScenarioCloth('tshirt');
+        performanceMonitor.markScenarioStep('vaquero');
+        await this.loadScenarioCloth('denim_mom_jean');
+        this.applyStudioMeasurements({ height: 190, chest: 125, waist: 110, hips: 115 });
+        this.updateAvatarFromStudio();
+
+        performanceMonitor.markScenarioStep('recorrido completado');
     }
 }
 

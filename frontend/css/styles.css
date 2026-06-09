@@ -978,3 +978,90 @@ select.modern-select:focus {
 .btn-secondary:hover {
     background: #f3f4f6;
 }
+
+#perfPanel {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    width: min(360px, calc(100vw - 32px));
+    z-index: 10000;
+    background: rgba(17, 24, 39, 0.94);
+    color: #f9fafb;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.35);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12px;
+}
+
+.perf-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.perf-panel-header strong {
+    font-size: 13px;
+}
+
+.perf-panel-header span,
+.perf-meta {
+    color: #cbd5e1;
+}
+
+.perf-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.perf-grid div {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 7px;
+    min-width: 0;
+}
+
+.perf-grid span {
+    display: block;
+    color: #cbd5e1;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.perf-grid strong {
+    display: block;
+    margin-top: 3px;
+    font-size: 13px;
+    line-height: 1.2;
+}
+
+.perf-meta {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-bottom: 10px;
+}
+
+.perf-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.perf-actions button {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+    color: #f9fafb;
+    border-radius: 6px;
+    padding: 7px 6px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.perf-actions button:hover {
+    background: rgba(255, 255, 255, 0.18);
+}

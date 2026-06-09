@@ -1560,7 +1560,12 @@
     "https://esm.sh/string_decoder@1.1.1/denonext/string_decoder.mjs": "494e5a7fae95d5326e8aee93b4adfde75e389eea7a54bc1feea8549e786da032",
     "https://esm.sh/string_decoder@1.1.1?target=denonext": "092c97b62b99368a40fa044c402188472658bc71529415f73c16f66c05aaf6bf",
     "https://esm.sh/util-deprecate@1.0.2/denonext/util-deprecate.mjs": "083639894972cb68837eef26346c43bdd01357977149e0a4493f76192a4008b8",
-    "https://esm.sh/util-deprecate@1.0.2?target=denonext": "859f4df8ba771a4c33143185d3db6a7edb824fab1ed4f9a4b96ac0e6bc3ef1a4"
+    "https://esm.sh/util-deprecate@1.0.2?target=denonext": "859f4df8ba771a4c33143185d3db6a7edb824fab1ed4f9a4b96ac0e6bc3ef1a4",
+    "https://unpkg.com/three@0.160.0/build/three.module.js": "76dea8151bc9352aef3528b4262e249b2604f62543828328db978d060d61a495",
+    "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064",
+    "https://unpkg.com/three@0.160.0/examples/jsm/environments/RoomEnvironment.js": "e21f41b7ef2016f2984a5d27850b42dffa797a6a194a138e288b06576d765a7b",
+    "https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js": "d073b438e6a07e1359741dd5d6c76c953420cc0d4fd84eb1bdde94315540e6a3",
+    "https://unpkg.com/three@0.160.0/examples/jsm/utils/BufferGeometryUtils.js": "9be041e96308775d00e2695cc607645b9a9b64fd7c0e759dd8f7c00a8d92becb"
   },
   "workspace": {
     "dependencies": [

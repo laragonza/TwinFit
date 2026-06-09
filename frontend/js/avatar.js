@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { performanceMonitor } from './performanceMonitor.js';
 
 export class Avatar {
     constructor() {
@@ -25,6 +26,13 @@ export class Avatar {
 
         console.log(`🔄 Cargando avatar: ${modelPath}`);
         if (window.showToast) window.showToast(`🔄 Cargando avatar...`, false, true);
+
+        const perfLoadId = performanceMonitor.startAssetLoad({
+            category: 'avatar',
+            type: gender,
+            name: `avatar_${gender}`,
+            url: modelPath,
+        });
 
         this.loader.load(
             modelPath,
@@ -111,9 +119,14 @@ export class Avatar {
                 }
 
                 console.log(`🎉 Avatar ${gender} listo!`);
+                performanceMonitor.endAssetLoad(perfLoadId, {
+                    status: 'ok',
+                    object: this.model,
+                });
                 window.dispatchEvent(new CustomEvent('avatar-loaded'));
             },
             (xhr) => {
+                performanceMonitor.recordAssetProgress(perfLoadId, xhr);
                 if (xhr.total > 0) {
                     const pct = Math.round(xhr.loaded / xhr.total * 100);
                     console.log(`📥 Cargando: ${pct}%`);
@@ -123,6 +136,7 @@ export class Avatar {
             (error) => {
                 console.error(`❌ Error cargando avatar:`, error);
                 if (window.showToast) window.showToast(`❌ Error cargando avatar`, true);
+                performanceMonitor.endAssetLoad(perfLoadId, { status: 'error' });
                 this.createPlaceholder();
             }
         );

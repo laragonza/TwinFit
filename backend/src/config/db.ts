@@ -3,21 +3,19 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-let client: MongoClient;
-let db: Db;
+let client: MongoClient | undefined;
+let db: Db | undefined;
 
 const dbName = "twinfit";
 
-// Aquí me conecto a MongoDB, ¡crucemos los dedos!
 export const connectToMongoDB = async () => {
   try {
     const mongoUrl = process.env.MONGODB_URI;
 
     if (!mongoUrl) {
-      throw new Error("No encuentro la MONGODB_URI en las variables de entorno, ¡ups!");
+      throw new Error("No se ha definido MONGODB_URI en las variables de entorno");
     }
 
-    // Oculto la contraseña para que no se vea en los logs, por seguridad
     const maskedUrl = mongoUrl.replace(/:([^@]+)@/, ":****@");
     console.log(`Conectando a MongoDB en: ${maskedUrl}`);
 
@@ -25,17 +23,28 @@ export const connectToMongoDB = async () => {
     await client.connect();
 
     db = client.db(dbName);
-    console.log("✅ ¡Conectada a la base de datos de MongoDB con éxito!");
+    console.log("Conectada a la base de datos de MongoDB");
   } catch (err) {
-    console.error("❌ Jo, ha habido un error al conectar:", err);
+    console.error("Error al conectar con MongoDB:", err);
     throw err;
   }
 };
 
-// Con esto pillo la base de datos cuando la necesito
 export const getDB = (): Db => {
   if (!db) {
-    throw new Error("❌ La base de datos no está lista todavía");
+    throw new Error("La base de datos no esta inicializada");
   }
   return db;
+};
+
+export const setDBForTesting = (testDb: Db) => {
+  db = testDb;
+};
+
+export const resetDBForTesting = async () => {
+  if (client) {
+    await client.close();
+  }
+  client = undefined;
+  db = undefined;
 };

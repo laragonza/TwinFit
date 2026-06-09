@@ -1,58 +1,55 @@
 import { Request, Response } from "express";
-import { getDB } from "../config/db.ts";
-import { UserSchema } from "../models/user.ts";
 import { ObjectId } from "mongodb";
+import { getDB } from "../config/db.ts";
+import { buildAnthropometricProfile, extractCoreMeasures } from "../models/anthropometry.ts";
+import { UserSchema } from "../models/user.ts";
 
-// Este es el controlador para los usuarios con Express
 export const createUser = async (req: Request, res: Response) => {
     try {
         const db = getDB();
         const users = db.collection<UserSchema>("users");
-
         const value = req.body;
 
-        if (!value) {
-            res.status(400).json({ error: "Cuerpo inválido, esperaba un JSON" });
+        if (!value || typeof value !== "object") {
+            res.status(400).json({ error: "Cuerpo invalido, esperaba un JSON" });
             return;
         }
 
-        const { name, height, measures, gender } = value as {
+        const { name, gender } = value as {
             name: string;
-            height: number;
-            measures: { chest: number; waist: number; hips: number };
-            gender: 'male' | 'female';
+            gender: "male" | "female";
         };
+        const { missing: missingProfileFields, profile } = buildAnthropometricProfile(
+            value as Record<string, unknown>,
+        );
 
-        // Compruebo que no falte ningún dato e indico exactamente cuáles faltan
         const missing: string[] = [];
-        if (!name)    missing.push("nombre");
-        if (!height)  missing.push("estatura");
-        if (!gender)  missing.push("género");
-        if (!measures || !measures.chest || !measures.waist || !measures.hips)
-            missing.push("medidas (pecho, cintura, caderas)");
+        if (!name) missing.push("nombre");
+        if (!gender) missing.push("genero");
+        missing.push(...missingProfileFields);
 
-        if (missing.length > 0) {
+        if (missing.length > 0 || !profile) {
             res.status(400).json({ error: `Faltan campos obligatorios: ${missing.join(", ")}` });
             return;
         }
 
-        // Registro al nuevo usuario en la base de datos
+        const measures = extractCoreMeasures(profile);
         const result = await users.insertOne({
             name,
-            height,
-            measures,
             gender,
+            height: profile.stature,
+            anthropometricProfile: profile,
+            measures,
             _id: new ObjectId(),
         });
 
-        res.status(201).json({ message: "¡Usuario creado!", id: result.insertedId });
+        res.status(201).json({ message: "Usuario creado", id: result.insertedId });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Error interno, algo ha fallado..." });
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 };
 
-// Aquí busco a un usuario por su ID
 export const getUser = async (req: Request, res: Response) => {
     try {
         const db = getDB();
@@ -74,6 +71,6 @@ export const getUser = async (req: Request, res: Response) => {
         res.status(200).json(user);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "ID inválido o error del servidor" });
+        res.status(500).json({ error: "ID invalido o error del servidor" });
     }
 };

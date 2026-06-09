@@ -8,12 +8,26 @@ export const typeDefs = gql`
     hips: Int
   }
 
+  type BodyDimension {
+    key: String
+    value: Float
+  }
+
+  type AnthropometricProfile {
+    schemaVersion: Int
+    unit: String
+    stature: Float
+    dimensions: [BodyDimension]
+    requiredDimensions: [String]
+  }
+
   type User {
     id: ID!
     name: String
     gender: String
     height: Int
     weight: Int
+    anthropometricProfile: AnthropometricProfile
     measures: Measures
   }
 

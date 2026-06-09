@@ -2,14 +2,14 @@
 
 TwinFit es mi proyecto final: un probador virtual en 3D hecho con frontend web, Three.js y un backend conectado a MongoDB.
 
-La idea principal es que una persona pueda crear un avatar, modificar sus medidas corporales y probar algunas prendas dentro de una escena 3D. Es un prototipo funcional, no una aplicacion comercial terminada, pero sirve para demostrar la base de un probador virtual y los problemas reales que aparecen al adaptar ropa 3D a distintos cuerpos.
+La idea principal es que una persona pueda crear un avatar, modificar su perfil antropometrico y probar algunas prendas dentro de una escena 3D. Es un prototipo funcional, no una aplicacion comercial terminada, pero sirve para demostrar la base de un probador virtual y los problemas reales que aparecen al adaptar ropa 3D a distintos cuerpos.
 
 ## Funcionalidades
 
 La aplicacion permite:
 
 - Crear un avatar femenino o masculino.
-- Cambiar medidas como altura, pecho, cintura y caderas.
+- Ajustar un perfil antropometrico basico para adaptar el avatar y las prendas.
 - Modificar el tono de piel del avatar.
 - Mover la camara para ver el modelo de frente, de lado o por detras.
 - Probar prendas 3D sobre el avatar.
@@ -43,6 +43,64 @@ El backend se conecta a la base de datos `twinfit`. Las colecciones principales 
 - `clothes`, para guardar informacion de prendas cuando se cargan desde la API.
 
 Si MongoDB no esta configurado, la parte visual del frontend puede seguir mostrando algunas prendas locales de respaldo, pero las funciones de backend, como guardar perfiles, no funcionaran correctamente.
+
+## Modelo antropometrico
+
+Los datos corporales se agrupan conceptualmente como un `anthropometricProfile`. Este perfil contiene la estatura y un mapa extensible de dimensiones corporales en centimetros. El prototipo actual usa un subconjunto minimo para ajustar las prendas disponibles, pero el documento puede incorporar nuevas claves como `shoulder_width` o `sleeve_length` sin cambiar la estructura general de la API.
+
+El backend mantiene `height` y `measures` como compatibilidad con el formato inicial, pero la nomenclatura tecnica recomendada para la memoria es perfil antropometrico o mapa de dimensiones corporales. La justificacion completa esta en `docs/modelo_antropometrico.md`.
+
+## Seguridad y privacidad
+
+TwinFit trata perfiles antropometricos y, opcionalmente, analiza una imagen local para estimar el tono de piel del avatar. La imagen se procesa en el navegador y no se almacena en MongoDB. El backend incorpora CORS configurable, cabeceras basicas de seguridad y `Cache-Control: no-store` para las respuestas de API.
+
+El prototipo no debe considerarse listo para produccion: un despliegue real deberia exigir HTTPS, autenticacion y autorizacion para acceder a perfiles, gestion segura de tokens, cifrado en transito y en reposo, politicas de minimizacion y mecanismos de supresion de datos conforme al RGPD.
+
+El analisis completo esta en `docs/seguridad_privacidad_rgpd.md`.
+
+## Pruebas tecnicas automatizadas
+
+El backend REST cuenta con una suite de pruebas automatizadas en `backend/tests/rest_api_test.ts`. Las pruebas levantan la app Express en un puerto efimero y usan un doble de MongoDB en memoria para validar los endpoints sin depender de credenciales ni de una instancia externa de MongoDB.
+
+La suite cubre altas y consultas de usuarios, altas y listados de prendas, validaciones de campos obligatorios, rechazo de tipos de prenda no soportados y el estado desactivado del analisis automatico de foto.
+
+Para ejecutarlas desde `TwinFit/`:
+
+```bash
+deno task test
+```
+
+El plan completo esta documentado en `docs/plan_pruebas_tecnicas.md`.
+
+## Pruebas de rendimiento del cliente
+
+El frontend incluye un modo de medicion activable con `?perf=1`. Este modo registra FPS, tiempos de carga de modelos GLB, long tasks del hilo principal, memoria JS cuando el navegador la expone y estadisticas de Three.js como geometrias, texturas y triangulos renderizados.
+
+Para medir en el ordenador:
+
+```bash
+deno task frontend
+```
+
+Abrir:
+
+```text
+http://127.0.0.1:4509/?perf=1
+```
+
+Para medir desde un movil conectado a la misma red:
+
+```bash
+deno task frontend:lan
+```
+
+Abrir en el movil:
+
+```text
+http://IP_DEL_ORDENADOR:4509/?perf=1
+```
+
+El apendice de metodologia y tablas esta en `docs/apendice_rendimiento_cliente.md`.
 
 ## Estructura del proyecto
 

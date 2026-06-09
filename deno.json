@@ -2,7 +2,10 @@
     "tasks": {
         "start": "deno run --allow-net --allow-read --allow-env --allow-sys --watch backend/src/server.ts",
         "backend": "deno task start",
-        "frontend": "deno run --allow-net --allow-read --allow-sys https://deno.land/std/http/file_server.ts frontend --host 127.0.0.1 --port 4509"
+        "frontend": "deno run --allow-net --allow-read --allow-sys https://deno.land/std/http/file_server.ts frontend --host 127.0.0.1 --port 4509",
+        "frontend:lan": "deno run --allow-net --allow-read --allow-sys https://deno.land/std/http/file_server.ts frontend --host 0.0.0.0 --port 4509",
+        "frontend:lan:4510": "deno run --allow-net --allow-read --allow-sys https://deno.land/std/http/file_server.ts frontend --host 0.0.0.0 --port 4510",
+        "test": "deno task --cwd backend test"
     },
     "nodeModulesDir": "auto",
     "imports": {
@@ -10,6 +13,8 @@
         "cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
         "mongo": "https://deno.land/x/mongo@v0.32.0/mod.ts",
         "std/": "https://deno.land/std@0.208.0/",
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
         "mongodb": "npm:mongodb@6.3.0",
         "dotenv": "npm:dotenv@16.3.1",
         "apollo-server": "npm:apollo-server@3.13.0",

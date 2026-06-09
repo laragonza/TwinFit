@@ -17,6 +17,14 @@ export const resolvers = {
     User: {
         id: (parent: any) => parent._id.toString(),
     },
+    AnthropometricProfile: {
+        dimensions: (parent: any) => {
+            return Object.entries(parent.dimensions || {}).map(([key, value]) => ({
+                key,
+                value,
+            }));
+        },
+    },
     Cloth: {
         id: (parent: any) => parent._id.toString(),
     },

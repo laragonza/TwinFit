@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { performanceMonitor } from './performanceMonitor.js';
 
 // Dejo separados los vestidos porque se tratan como una misma familia.
 const DRESS_TYPES = new Set(['dress3', 'dress4']);
@@ -554,11 +555,22 @@ export class Wardrobe {
             }
         }
 
+        const perfLoadId = performanceMonitor.startAssetLoad({
+            category: 'cloth',
+            type: clothData.type,
+            name: clothData.name || clothData.type,
+            url: clothData.modelPath,
+        });
+
         this.loader.load(
             clothData.modelPath,
             (gltf) => {
                 try {
                     const model = gltf.scene;
+                    performanceMonitor.endAssetLoad(perfLoadId, {
+                        status: 'ok',
+                        object: model,
+                    });
                     console.log(`Cloth callback: type=${clothData.type}, hasModel=${!!model}`);
 
                     // Enganchamos la ropa al "esqueleto" del avatar para que se mueva con Ã©l
@@ -699,9 +711,12 @@ export class Wardrobe {
                     console.error(`en callback de ${clothData.type}:`, e);
                 }
             },
-            undefined,
+            (xhr) => {
+                performanceMonitor.recordAssetProgress(perfLoadId, xhr);
+            },
             (error) => {
                 console.warn(`âš ï¸ Error cargando ${clothData.modelPath}:`, error);
+                performanceMonitor.endAssetLoad(perfLoadId, { status: 'error' });
                 if (fallbackModelPath && clothData.modelPath !== fallbackModelPath) {
                     this.loadCloth({ ...clothData, modelPath: fallbackModelPath }, avatar);
                     return;

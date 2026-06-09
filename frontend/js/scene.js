@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { performanceMonitor } from './performanceMonitor.js';
 
 export class SceneManager {
     constructor(containerId) {
@@ -26,6 +27,7 @@ export class SceneManager {
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.0;
         this.container.appendChild(this.renderer.domElement);
+        performanceMonitor.attachRenderer(this.renderer);
 
         // Pongo el ambiente y las luces
         this.setupEnvironment();
@@ -121,8 +123,10 @@ export class SceneManager {
 
     animationLoop() {
         requestAnimationFrame(this.animationLoop);
+        const renderStart = performance.now();
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
+        performanceMonitor.recordFrame(performance.now(), performance.now() - renderStart);
     }
 
     addToScene(object) {
